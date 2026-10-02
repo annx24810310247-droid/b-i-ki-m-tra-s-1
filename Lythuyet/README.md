@@ -1,1 +1,77 @@
 
+Câu 1: Value Types vs Reference Types (Stack vs Heap)
+Tiêu chí
+Value Types 
+Reference Types 
+Các kiểu dữ liệu phổ biến
+int, float, bool, char, struct, enum, Tuple.
+class, interface, delegate, object, string, array.
+Cơ chế lưu trữ vùng nhớ
+Giá trị thực của biến được lưu trực tiếp tại vùng nhớ tương ứng (thường là Stack).
+Được chia làm 2 phần:
+
+1. Tham chiếu Địa chỉ vùng nhớ: Lưu trên Stack.
+
+2. Đối tượng thực sự: Lưu trên Heap.
+Sao chép biến (b = a)
+Sao chép toàn bộ dữ liệu/giá trị. Thay đổi b không làm ảnh hưởng tới a.
+Sao chép địa chỉ vùng nhớ. Cả a và b cùng trỏ tới 1 đối tượng trên Heap, thay đổi qua b sẽ làm thay đổi a.
+Quản lý bộ nhớ
+Tự động dọn dẹp ngay khi biến ra khỏi phạm vi hoạt động (Out of scope).
+Do cơ chế Garbage Collector (GC) thu hồi khi không còn biến nào trỏ tới đối tượng trên Heap.
+Hiệu năng & Phân bổ
+Khởi tạo nhanh, không gây gánh nặng cho Garbage Collector.
+Tốn chi phí cấp phát vùng nhớ Heap và gánh nặng dọn dẹp cho GC.
+
+Câu 2: Init-only Properties (init) trong C# 9/10
+Sự khác biệt giữa init và set thông thường
+set thông thường: Cho phép gán/thay đổi giá trị của thuộc tính bất kỳ lúc nào trong suốt vòng đời của đối tượng.
+init (Init-only): Cho phép gán giá trị duy nhất 1 lần tại thời điểm khởi tạo đối tượng (thông qua Constructor hoặc Object Initializer { }). Sau khi đối tượng đã khởi tạo xong, thuộc tính trở thành read-only (chỉ đọc) và không thể thay đổi giá trị.
+public class Person
+{
+    public string Id { get; init; }      
+    public string Name { get; set; }    
+}
+
+// Cách sử dụng:
+var p = new Person { Id = "123", Name = "An" }; 
+p.Name = "Bình"; // Hợp lệ
+// p.Id = "456";  // LỖI BIÊN DỊCH: Không thể gán lại cho thuộc tính 'init'
+
+
+Trường hợp sử dụng thực tế (Use Case)
+Tạo các đối tượng bất biến (Immutable Objects): Khi thiết kế DTO (Data Transfer Object), Command trong kiến trúc CQRS, hoặc các Model đại diện cho dữ liệu không được phép chỉnh sửa sau khi tạo (như Id, CreatedDate, SSN).
+Thay thế Constructor dài dòng: Giúp sử dụng cú pháp Object Initializer mượt mà, rõ nghĩa mà vẫn đảm bảo tính an toàn dữ liệu (Immutability) mà không cần viết quá nhiều Constructor quá tải (overloaded constructors).
+Câu 3: Phân biệt virtual và override trong Đa hình
+Trong C#, tính Đa hình dạng ghi đè (Overriding) đòi hỏi sự phối hợp giữa hai từ khóa này:
+Phương thức virtual (Lớp cha):
+Khai báo một phương thức ở lớp cha rằng: "Đây là phương thức có hành vi mặc định, nhưng cho phép các lớp con có thể định nghĩa lại (ghi đè) nếu muốn."
+Nếu lớp con không ghi đè, nó sẽ dùng lại logic mặc định của phương thức virtual.
+Phương thức override (Lớp con):
+Khai báo ở lớp con để thay thế hoàn toàn cài đặt của phương thức virtual từ lớp cha.
+Khi gọi phương thức qua một biến kiểu lớp cha nhưng trỏ đến đối tượng lớp con, C# sẽ chạy phiên bản override ở lớp con (Dynamic Binding / Late Binding).
+public class Animal
+{
+    public virtual void Speak() => Console.WriteLine("Animal makes a sound");
+}
+
+public class Dog : Animal
+{
+    public override void Speak() => Console.WriteLine("Dog barks");
+}
+
+
+Animal myPet = new Dog();
+myPet.Speak(); // Kết quả: "Dog barks" (Gọi phương thức override của Dog)
+
+
+Câu 4: Tại sao thành phần static không truy xuất qua Instance?
+Trong C#, việc không cho phép gọi thành phần static qua thể hiện (Object Instance) xuất phát từ các lý do sau:
+Bản chất quản lý bộ nhớ:
+Thành phần static thuộc về mức độ Lớp (Class level), được cấp phát bộ nhớ duy nhất một lần khi Class được nạp vào bộ nhớ (AppDomain) và tồn tại xuyên suốt chương trình.
+Các thành phần không có static (Instance members) thuộc về mức độ Thể hiện (Object level), được tạo ra trên Heap mỗi khi dùng toán tử new.
+Tránh gây hiểu lầm về mặt ngữ nghĩa (Design Intention):
+Các thành phần static đại diện cho dữ liệu/hành vi dùng chung cho toàn bộ lớp, không phụ thuộc vào trạng thái riêng của bất kỳ thể hiện nào.
+Nếu cho phép gọi qua instance.StaticMethod(), lập trình viên dễ hiểu nhầm rằng phương thức đó đang thao tác trên dữ liệu riêng của instance đó.
+
+C# được thiết kế chặt chẽ (strictly typed). Việc bắt buộc gọi qua tên lớp (ClassName.StaticMember) giúp mã nguồn rõ ràng, tường minh (explicit), tránh nhầm lẫn trong quá trình bảo trì và tối ưu hóa biên dịch.
