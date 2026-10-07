@@ -1,0 +1,127 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+// Câu 1: Định nghĩa cấu trúc nhân viên
+struct NhanVien {
+    int maNV;
+    string hoTen;
+    string ngaySinh;
+    float luong;
+};
+
+// Câu 2: Nhập mảng n nhân viên
+void nhap(NhanVien a[], int n) {
+    for (int i = 0; i < n; i++) {
+        cout << "\nNhan vien thu " << i + 1 << ":\n";
+
+        cout << "Ma nhan vien: ";
+        cin >> a[i].maNV;
+        cin.ignore();
+
+        cout << "Ho ten: ";
+        getline(cin, a[i].hoTen);
+
+        cout << "Ngay sinh (dd/mm/yyyy): ";
+        getline(cin, a[i].ngaySinh);
+
+        cout << "Luong (trieu dong): ";
+        cin >> a[i].luong;
+    }
+}
+
+// Câu 3: Xuất mảng
+void xuat(NhanVien a[], int n) {
+    cout << "\nDANH SACH NHAN VIEN\n";
+
+    for (int i = 0; i < n; i++) {
+        cout << "\nMa NV: " << a[i].maNV;
+        cout << "\nHo ten: " << a[i].hoTen;
+        cout << "\nNgay sinh: " << a[i].ngaySinh;
+        cout << "\nLuong: " << a[i].luong << " trieu dong\n";
+    }
+}
+
+// Câu 4: Sắp xếp nổi bọt theo lương tăng dần
+void bubbleSort(NhanVien a[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (a[j].luong > a[j + 1].luong) {
+                NhanVien temp = a[j];
+                a[j] = a[j + 1];
+                a[j + 1] = temp;
+            }
+        }
+    }
+}
+
+// Câu 5: Tìm kiếm nhị phân nhân viên có lương = X
+void timKiem(NhanVien a[], int n, float X) {
+    int left = 0;
+    int right = n - 1;
+    bool timThay = false;
+
+    while (left <= right) {
+        int mid = (left + right) / 2;
+
+        if (a[mid].luong == X) {
+            int i = mid;
+
+            while (i >= 0 && a[i].luong == X)
+                i--;
+
+            i++;
+
+            cout << "\nNHAN VIEN CO LUONG = " << X << " TRIEU:\n";
+
+            while (i < n && a[i].luong == X) {
+                cout << "\nMa NV: " << a[i].maNV;
+                cout << "\nHo ten: " << a[i].hoTen;
+                cout << "\nNgay sinh: " << a[i].ngaySinh;
+                cout << "\nLuong: " << a[i].luong << " trieu dong\n";
+                i++;
+            }
+
+            timThay = true;
+            break;
+        }
+        else if (a[mid].luong < X) {
+            left = mid + 1;
+        }
+        else {
+            right = mid - 1;
+        }
+    }
+
+    if (!timThay) {
+        cout << "\nKhong tim thay nhan vien co luong = "
+             << X << " trieu dong.\n";
+    }
+}
+
+// Câu 6: Hàm main
+int main() {
+    NhanVien a[100];
+    int n;
+    float X;
+
+    cout << "Nhap so luong nhan vien: ";
+    cin >> n;
+
+    nhap(a, n);
+
+    cout << "\n--- DANH SACH VUA NHAP ---";
+    xuat(a, n);
+
+    bubbleSort(a, n);
+
+    cout << "\n--- DANH SACH SAU KHI SAP XEP ---";
+    xuat(a, n);
+
+    cout << "\nNhap X: ";
+    cin >> X;
+
+    timKiem(a, n, X);
+
+    return 0;
+}
