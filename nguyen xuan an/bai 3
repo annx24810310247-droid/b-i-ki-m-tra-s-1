@@ -1,0 +1,380 @@
+///////////////////form.cs
+using System;
+using System.Windows.Forms;
+
+namespace bai_3
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            cboDVT.Items.Clear();
+            cboDVT.Items.AddRange(new string[] { "Cái", "Bộ", "Kg", "Mét" });
+            cboDVT.SelectedIndex = 0;
+        }
+
+        private bool KiemTraTrungMa(string maVT)
+        {
+            foreach (ListViewItem item in lsvVatTu.Items)
+            {
+                if (item.Text.Equals(maVT, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void ClearInput()
+        {
+            txtMaVT.Clear();
+            txtTenVT.Clear();
+            txtDonGia.Clear();
+            if (cboDVT.Items.Count > 0) cboDVT.SelectedIndex = 0;
+            txtMaVT.Enabled = true;
+            txtMaVT.Focus();
+        }
+
+        private void btnThem_Click(object sender, EventArgs e)
+        {
+            string maVT = txtMaVT.Text.Trim();
+            string tenVT = txtTenVT.Text.Trim();
+            string donGiaStr = txtDonGia.Text.Trim();
+
+            if (string.IsNullOrEmpty(maVT) || string.IsNullOrEmpty(tenVT) || string.IsNullOrEmpty(donGiaStr))
+            {
+                MessageBox.Show("Vui lòng nhập đầy đủ thông tin vật tư!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (KiemTraTrungMa(maVT))
+            {
+                MessageBox.Show($"Mã vật tư '{maVT}' đã tồn tại trong danh sách!", "Lỗi nhập liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                txtMaVT.Focus();
+                return;
+            }
+
+            if (!decimal.TryParse(donGiaStr, out decimal donGia) || donGia < 0)
+            {
+                MessageBox.Show("Đơn giá nhập phải là số hợp lệ!", "Lỗi định dạng", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtDonGia.Focus();
+                return;
+            }
+
+            ListViewItem item = new ListViewItem(maVT);
+            item.SubItems.Add(tenVT);
+            item.SubItems.Add(cboDVT.SelectedItem.ToString());
+            item.SubItems.Add(donGia.ToString("#,##0"));
+
+            lsvVatTu.Items.Add(item);
+            ClearInput();
+        }
+
+        private void btnCapNhat_Click(object sender, EventArgs e)
+        {
+            if (lsvVatTu.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Vui lòng chọn 1 dòng vật tư trong danh sách để cập nhật!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            string tenVT = txtTenVT.Text.Trim();
+            string donGiaStr = txtDonGia.Text.Trim();
+
+            if (string.IsNullOrEmpty(tenVT) || string.IsNullOrEmpty(donGiaStr))
+            {
+                MessageBox.Show("Vui lòng nhập Tên vật tư và Đơn giá!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (!decimal.TryParse(donGiaStr, out decimal donGia) || donGia < 0)
+            {
+                MessageBox.Show("Đơn giá nhập phải là số hợp lệ!", "Lỗi định dạng", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtDonGia.Focus();
+                return;
+            }
+
+            ListViewItem selectedItem = lsvVatTu.SelectedItems[0];
+            selectedItem.SubItems[1].Text = tenVT;
+            selectedItem.SubItems[2].Text = cboDVT.SelectedItem.ToString();
+            selectedItem.SubItems[3].Text = donGia.ToString("#,##0");
+
+            MessageBox.Show("Cập nhật thông tin vật tư thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            ClearInput();
+        }
+
+        private void btnXoaDong_Click(object sender, EventArgs e)
+        {
+            if (lsvVatTu.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Vui lòng chọn dòng cần xóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            ListViewItem selectedItem = lsvVatTu.SelectedItems[0];
+            DialogResult dr = MessageBox.Show(
+                $"Bạn có chắc chắn muốn xóa vật tư '{selectedItem.SubItems[1].Text}' (Mã: {selectedItem.Text}) không?",
+                "Xác nhận xóa",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+
+            if (dr == DialogResult.Yes)
+            {
+                lsvVatTu.Items.Remove(selectedItem);
+                ClearInput();
+            }
+        }
+
+        private void btnXoaTatCa_Click(object sender, EventArgs e)
+        {
+            if (lsvVatTu.Items.Count == 0)
+            {
+                MessageBox.Show("Danh sách đang trống!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            DialogResult dr = MessageBox.Show(
+                "Bạn có chắc chắn muốn xóa TOÀN BỘ danh sách vật tư không?",
+                "Xác nhận xóa tất cả",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning
+            );
+
+            if (dr == DialogResult.Yes)
+            {
+                lsvVatTu.Items.Clear();
+                ClearInput();
+            }
+        }
+
+        private void lsvVatTu_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lsvVatTu.SelectedItems.Count > 0)
+            {
+                ListViewItem item = lsvVatTu.SelectedItems[0];
+                txtMaVT.Text = item.Text;
+                txtTenVT.Text = item.SubItems[1].Text;
+                cboDVT.SelectedItem = item.SubItems[2].Text;
+
+                string donGiaClean = item.SubItems[3].Text.Replace(",", "").Replace(".", "");
+                txtDonGia.Text = donGiaClean;
+
+                txtMaVT.Enabled = false;
+            }
+            else
+            {
+                txtMaVT.Enabled = true;
+            }
+        }
+    }
+    
+}
+//////////////////form.designer
+namespace bai_3
+{
+    partial class Form1
+    {
+        private System.ComponentModel.IContainer components = null;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        private void InitializeComponent()
+        {
+            this.gbNhapLieu = new System.Windows.Forms.GroupBox();
+            this.lblMaVT = new System.Windows.Forms.Label();
+            this.txtMaVT = new System.Windows.Forms.TextBox();
+            this.lblTenVT = new System.Windows.Forms.Label();
+            this.txtTenVT = new System.Windows.Forms.TextBox();
+            this.lblDVT = new System.Windows.Forms.Label();
+            this.cboDVT = new System.Windows.Forms.ComboBox();
+            this.lblDonGia = new System.Windows.Forms.Label();
+            this.txtDonGia = new System.Windows.Forms.TextBox();
+            this.btnThem = new System.Windows.Forms.Button();
+            this.btnCapNhat = new System.Windows.Forms.Button();
+            this.btnXoaDong = new System.Windows.Forms.Button();
+            this.btnXoaTatCa = new System.Windows.Forms.Button();
+            this.gbDanhSach = new System.Windows.Forms.GroupBox();
+            this.lsvVatTu = new System.Windows.Forms.ListView();
+            this.colMaVT = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colTenVT = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colDVT = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colDonGia = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.gbNhapLieu.SuspendLayout();
+            this.gbDanhSach.SuspendLayout();
+            this.SuspendLayout();
+
+            // gbNhapLieu
+            this.gbNhapLieu.Controls.Add(this.lblMaVT);
+            this.gbNhapLieu.Controls.Add(this.txtMaVT);
+            this.gbNhapLieu.Controls.Add(this.lblTenVT);
+            this.gbNhapLieu.Controls.Add(this.txtTenVT);
+            this.gbNhapLieu.Controls.Add(this.lblDVT);
+            this.gbNhapLieu.Controls.Add(this.cboDVT);
+            this.gbNhapLieu.Controls.Add(this.lblDonGia);
+            this.gbNhapLieu.Controls.Add(this.txtDonGia);
+            this.gbNhapLieu.Controls.Add(this.btnThem);
+            this.gbNhapLieu.Controls.Add(this.btnCapNhat);
+            this.gbNhapLieu.Controls.Add(this.btnXoaDong);
+            this.gbNhapLieu.Controls.Add(this.btnXoaTatCa);
+            this.gbNhapLieu.Location = new System.Drawing.Point(12, 12);
+            this.gbNhapLieu.Name = "gbNhapLieu";
+            this.gbNhapLieu.Size = new System.Drawing.Size(280, 330);
+            this.gbNhapLieu.TabIndex = 0;
+            this.gbNhapLieu.TabStop = false;
+            this.gbNhapLieu.Text = "Thông tin vật tư";
+
+            // lblMaVT
+            this.lblMaVT.AutoSize = true;
+            this.lblMaVT.Location = new System.Drawing.Point(15, 30);
+            this.lblMaVT.Text = "Mã vật tư:";
+
+            // txtMaVT
+            this.txtMaVT.Location = new System.Drawing.Point(95, 27);
+            this.txtMaVT.Size = new System.Drawing.Size(165, 20);
+
+            // lblTenVT
+            this.lblTenVT.AutoSize = true;
+            this.lblTenVT.Location = new System.Drawing.Point(15, 65);
+            this.lblTenVT.Text = "Tên vật tư:";
+
+            // txtTenVT
+            this.txtTenVT.Location = new System.Drawing.Point(95, 62);
+            this.txtTenVT.Size = new System.Drawing.Size(165, 20);
+
+            // lblDVT
+            this.lblDVT.AutoSize = true;
+            this.lblDVT.Location = new System.Drawing.Point(15, 100);
+            this.lblDVT.Text = "Đơn vị tính:";
+
+            // cboDVT
+            this.cboDVT.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboDVT.Location = new System.Drawing.Point(95, 97);
+            this.cboDVT.Size = new System.Drawing.Size(165, 21);
+
+            // lblDonGia
+            this.lblDonGia.AutoSize = true;
+            this.lblDonGia.Location = new System.Drawing.Point(15, 135);
+            this.lblDonGia.Text = "Đơn giá nhập:";
+
+            // txtDonGia
+            this.txtDonGia.Location = new System.Drawing.Point(95, 132);
+            this.txtDonGia.Size = new System.Drawing.Size(165, 20);
+
+            // btnThem
+            this.btnThem.Location = new System.Drawing.Point(18, 180);
+            this.btnThem.Size = new System.Drawing.Size(115, 30);
+            this.btnThem.Text = "Thêm mới";
+            this.btnThem.Click += new System.EventHandler(this.btnThem_Click);
+
+            // btnCapNhat
+            this.btnCapNhat.Location = new System.Drawing.Point(145, 180);
+            this.btnCapNhat.Size = new System.Drawing.Size(115, 30);
+            this.btnCapNhat.Text = "Cập nhật";
+            this.btnCapNhat.Click += new System.EventHandler(this.btnCapNhat_Click);
+
+            // btnXoaDong
+            this.btnXoaDong.Location = new System.Drawing.Point(18, 225);
+            this.btnXoaDong.Size = new System.Drawing.Size(115, 30);
+            this.btnXoaDong.Text = "Xóa dòng";
+            this.btnXoaDong.Click += new System.EventHandler(this.btnXoaDong_Click);
+
+            // btnXoaTatCa
+            this.btnXoaTatCa.Location = new System.Drawing.Point(145, 225);
+            this.btnXoaTatCa.Size = new System.Drawing.Size(115, 30);
+            this.btnXoaTatCa.Text = "Xóa toàn bộ";
+            this.btnXoaTatCa.Click += new System.EventHandler(this.btnXoaTatCa_Click);
+
+            // gbDanhSach
+            this.gbDanhSach.Controls.Add(this.lsvVatTu);
+            this.gbDanhSach.Location = new System.Drawing.Point(305, 12);
+            this.gbDanhSach.Name = "gbDanhSach";
+            this.gbDanhSach.Size = new System.Drawing.Size(465, 330);
+            this.gbDanhSach.TabIndex = 1;
+            this.gbDanhSach.TabStop = false;
+            this.gbDanhSach.Text = "Danh sách vật tư";
+
+            // lsvVatTu
+            this.lsvVatTu.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.colMaVT,
+            this.colTenVT,
+            this.colDVT,
+            this.colDonGia});
+            this.lsvVatTu.FullRowSelect = true;
+            this.lsvVatTu.GridLines = true;
+            this.lsvVatTu.HideSelection = false;
+            this.lsvVatTu.Location = new System.Drawing.Point(10, 20);
+            this.lsvVatTu.Name = "lsvVatTu";
+            this.lsvVatTu.Size = new System.Drawing.Size(445, 295);
+            this.lsvVatTu.TabIndex = 0;
+            this.lsvVatTu.UseCompatibleStateImageBehavior = false;
+            this.lsvVatTu.View = System.Windows.Forms.View.Details;
+            this.lsvVatTu.SelectedIndexChanged += new System.EventHandler(this.lsvVatTu_SelectedIndexChanged);
+
+            // colMaVT
+            this.colMaVT.Text = "Mã VT";
+            this.colMaVT.Width = 80;
+
+            // colTenVT
+            this.colTenVT.Text = "Tên VT";
+            this.colTenVT.Width = 150;
+
+            // colDVT
+            this.colDVT.Text = "Đơn vị tính";
+            this.colDVT.Width = 90;
+
+            // colDonGia
+            this.colDonGia.Text = "Đơn giá";
+            this.colDonGia.Width = 100;
+
+            // Form1
+            this.ClientSize = new System.Drawing.Size(782, 355);
+            this.Controls.Add(this.gbDanhSach);
+            this.Controls.Add(this.gbNhapLieu);
+            this.Name = "Form1";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Quản lý danh mục Vật tư / Linh kiện";
+            this.Load += new System.EventHandler(this.Form1_Load);
+            this.gbNhapLieu.ResumeLayout(false);
+            this.gbNhapLieu.PerformLayout();
+            this.gbDanhSach.ResumeLayout(false);
+            this.ResumeLayout(false);
+        }
+
+        #endregion
+
+        private System.Windows.Forms.GroupBox gbNhapLieu;
+        private System.Windows.Forms.Label lblMaVT;
+        private System.Windows.Forms.TextBox txtMaVT;
+        private System.Windows.Forms.Label lblTenVT;
+        private System.Windows.Forms.TextBox txtTenVT;
+        private System.Windows.Forms.Label lblDVT;
+        private System.Windows.Forms.ComboBox cboDVT;
+        private System.Windows.Forms.Label lblDonGia;
+        private System.Windows.Forms.TextBox txtDonGia;
+        private System.Windows.Forms.Button btnThem;
+        private System.Windows.Forms.Button btnCapNhat;
+        private System.Windows.Forms.Button btnXoaDong;
+        private System.Windows.Forms.Button btnXoaTatCa;
+        private System.Windows.Forms.GroupBox gbDanhSach;
+        private System.Windows.Forms.ListView lsvVatTu;
+        private System.Windows.Forms.ColumnHeader colMaVT;
+        private System.Windows.Forms.ColumnHeader colTenVT;
+        private System.Windows.Forms.ColumnHeader colDVT;
+        private System.Windows.Forms.ColumnHeader colDonGia;
+    }
+}
