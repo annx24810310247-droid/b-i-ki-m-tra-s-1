@@ -1,0 +1,378 @@
+////////////////////form.cs
+using System;
+using System.Windows.Forms;
+
+namespace bai_3
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            cboDVT.Items.Clear();
+            cboDVT.Items.AddRange(new string[] { "Cái", "Bộ", "Kg", "Mét" });
+            cboDVT.SelectedIndex = 0;
+        }
+
+        private bool KiemTraTrungMa(string maVT)
+        {
+            foreach (ListViewItem item in lsvVatTu.Items)
+            {
+                if (item.Text.Equals(maVT, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void ClearInput()
+        {
+            txtMaVT.Clear();
+            txtTenVT.Clear();
+            txtDonGia.Clear();
+            if (cboDVT.Items.Count > 0) cboDVT.SelectedIndex = 0;
+            txtMaVT.Enabled = true;
+            txtMaVT.Focus();
+        }
+
+        private void btnThem_Click(object sender, EventArgs e)
+        {
+            string maVT = txtMaVT.Text.Trim();
+            string tenVT = txtTenVT.Text.Trim();
+            string donGiaStr = txtDonGia.Text.Trim();
+
+            if (string.IsNullOrEmpty(maVT) || string.IsNullOrEmpty(tenVT) || string.IsNullOrEmpty(donGiaStr))
+            {
+                MessageBox.Show("Vui lòng nhập đầy đủ thông tin vật tư!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (KiemTraTrungMa(maVT))
+            {
+                MessageBox.Show($"Mã vật tư '{maVT}' đã tồn tại trong danh sách!", "Lỗi nhập liệu", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                txtMaVT.Focus();
+                return;
+            }
+
+            if (!decimal.TryParse(donGiaStr, out decimal donGia) || donGia < 0)
+            {
+                MessageBox.Show("Đơn giá nhập phải là số hợp lệ!", "Lỗi định dạng", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtDonGia.Focus();
+                return;
+            }
+
+            ListViewItem item = new ListViewItem(maVT);
+            item.SubItems.Add(tenVT);
+            item.SubItems.Add(cboDVT.SelectedItem.ToString());
+            item.SubItems.Add(donGia.ToString("#,##0"));
+
+            lsvVatTu.Items.Add(item);
+            ClearInput();
+        }
+
+        private void btnCapNhat_Click(object sender, EventArgs e)
+        {
+            if (lsvVatTu.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Vui lòng chọn 1 dòng vật tư trong danh sách để cập nhật!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            string tenVT = txtTenVT.Text.Trim();
+            string donGiaStr = txtDonGia.Text.Trim();
+
+            if (string.IsNullOrEmpty(tenVT) || string.IsNullOrEmpty(donGiaStr))
+            {
+                MessageBox.Show("Vui lòng nhập Tên vật tư và Đơn giá!", "Cảnh báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (!decimal.TryParse(donGiaStr, out decimal donGia) || donGia < 0)
+            {
+                MessageBox.Show("Đơn giá nhập phải là số hợp lệ!", "Lỗi định dạng", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtDonGia.Focus();
+                return;
+            }
+
+            ListViewItem selectedItem = lsvVatTu.SelectedItems[0];
+            selectedItem.SubItems[1].Text = tenVT;
+            selectedItem.SubItems[2].Text = cboDVT.SelectedItem.ToString();
+            selectedItem.SubItems[3].Text = donGia.ToString("#,##0");
+
+            MessageBox.Show("Cập nhật thông tin vật tư thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            ClearInput();
+        }
+
+        private void btnXoaDong_Click(object sender, EventArgs e)
+        {
+            if (lsvVatTu.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Vui lòng chọn dòng cần xóa!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            ListViewItem selectedItem = lsvVatTu.SelectedItems[0];
+            DialogResult dr = MessageBox.Show(
+                $"Bạn có chắc chắn muốn xóa vật tư '{selectedItem.SubItems[1].Text}' (Mã: {selectedItem.Text}) không?",
+                "Xác nhận xóa",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+
+            if (dr == DialogResult.Yes)
+            {
+                lsvVatTu.Items.Remove(selectedItem);
+                ClearInput();
+            }
+        }
+
+        private void btnXoaTatCa_Click(object sender, EventArgs e)
+        {
+            if (lsvVatTu.Items.Count == 0)
+            {
+                MessageBox.Show("Danh sách đang trống!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            DialogResult dr = MessageBox.Show(
+                "Bạn có chắc chắn muốn xóa TOÀN BỘ danh sách vật tư không?",
+                "Xác nhận xóa tất cả",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning
+            );
+
+            if (dr == DialogResult.Yes)
+            {
+                lsvVatTu.Items.Clear();
+                ClearInput();
+            }
+        }
+
+        private void lsvVatTu_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lsvVatTu.SelectedItems.Count > 0)
+            {
+                ListViewItem item = lsvVatTu.SelectedItems[0];
+                txtMaVT.Text = item.Text;
+                txtTenVT.Text = item.SubItems[1].Text;
+                cboDVT.SelectedItem = item.SubItems[2].Text;
+
+                string donGiaClean = item.SubItems[3].Text.Replace(",", "").Replace(".", "");
+                txtDonGia.Text = donGiaClean;
+
+                txtMaVT.Enabled = false;
+            }
+            else
+            {
+                txtMaVT.Enabled = true;
+            }
+        }
+    }
+}
+///////////////form.designer
+namespace bai_2
+{
+    partial class Form1
+    {
+        private System.ComponentModel.IContainer components = null;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        private void InitializeComponent()
+        {
+            this.txtMaPhieu = new System.Windows.Forms.TextBox();
+            this.txtNguoiYeuCau = new System.Windows.Forms.TextBox();
+            this.dtpNgayGhiNhan = new System.Windows.Forms.DateTimePicker();
+            this.rdbThap = new System.Windows.Forms.RadioButton();
+            this.rdbTrungBinh = new System.Windows.Forms.RadioButton();
+            this.rdbKhanCap = new System.Windows.Forms.RadioButton();
+            this.cboLoaiSuCo = new System.Windows.Forms.ComboBox();
+            this.chkMayTinhBan = new System.Windows.Forms.CheckBox();
+            this.chkLaptop = new System.Windows.Forms.CheckBox();
+            this.chkMayIn = new System.Windows.Forms.CheckBox();
+            this.chkDienThoai = new System.Windows.Forms.CheckBox();
+            this.picAnhLoi = new System.Windows.Forms.PictureBox();
+            this.btnTaiAnh = new System.Windows.Forms.Button();
+            this.btnGuiYeuCau = new System.Windows.Forms.Button();
+            this.btnNhapLai = new System.Windows.Forms.Button();
+            this.lblMaPhieu = new System.Windows.Forms.Label();
+            this.lblNguoiYeuCau = new System.Windows.Forms.Label();
+            this.lblNgay = new System.Windows.Forms.Label();
+            this.lblLoaiSuCo = new System.Windows.Forms.Label();
+            this.gbUuTien = new System.Windows.Forms.GroupBox();
+            this.gbThietBi = new System.Windows.Forms.GroupBox();
+            ((System.ComponentModel.ISupportInitialize)(this.picAnhLoi)).BeginInit();
+            this.gbUuTien.SuspendLayout();
+            this.gbThietBi.SuspendLayout();
+            this.SuspendLayout();
+
+            // lblMaPhieu
+            this.lblMaPhieu.AutoSize = true;
+            this.lblMaPhieu.Location = new System.Drawing.Point(20, 23);
+            this.lblMaPhieu.Text = "Mã phiếu:";
+
+            // txtMaPhieu
+            this.txtMaPhieu.Location = new System.Drawing.Point(120, 20);
+            this.txtMaPhieu.Size = new System.Drawing.Size(150, 20);
+
+            // lblNguoiYeuCau
+            this.lblNguoiYeuCau.AutoSize = true;
+            this.lblNguoiYeuCau.Location = new System.Drawing.Point(20, 53);
+            this.lblNguoiYeuCau.Text = "Người yêu cầu:";
+
+            // txtNguoiYeuCau
+            this.txtNguoiYeuCau.Location = new System.Drawing.Point(120, 50);
+            this.txtNguoiYeuCau.Size = new System.Drawing.Size(150, 20);
+
+            // lblNgay
+            this.lblNgay.AutoSize = true;
+            this.lblNgay.Location = new System.Drawing.Point(20, 83);
+            this.lblNgay.Text = "Ngày ghi nhận:";
+
+            // dtpNgayGhiNhan
+            this.dtpNgayGhiNhan.Location = new System.Drawing.Point(120, 80);
+            this.dtpNgayGhiNhan.Size = new System.Drawing.Size(200, 20);
+
+            // lblLoaiSuCo
+            this.lblLoaiSuCo.AutoSize = true;
+            this.lblLoaiSuCo.Location = new System.Drawing.Point(20, 113);
+            this.lblLoaiSuCo.Text = "Loại sự cố:";
+
+            // cboLoaiSuCo
+            this.cboLoaiSuCo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboLoaiSuCo.Location = new System.Drawing.Point(120, 110);
+            this.cboLoaiSuCo.Size = new System.Drawing.Size(150, 21);
+
+            // gbUuTien
+            this.gbUuTien.Controls.Add(this.rdbThap);
+            this.gbUuTien.Controls.Add(this.rdbTrungBinh);
+            this.gbUuTien.Controls.Add(this.rdbKhanCap);
+            this.gbUuTien.Location = new System.Drawing.Point(340, 15);
+            this.gbUuTien.Size = new System.Drawing.Size(130, 115);
+            this.gbUuTien.Text = "Mức độ ưu tiên";
+
+            // rdbThap
+            this.rdbThap.Location = new System.Drawing.Point(15, 20);
+            this.rdbThap.Text = "Thấp";
+
+            // rdbTrungBinh
+            this.rdbTrungBinh.Location = new System.Drawing.Point(15, 45);
+            this.rdbTrungBinh.Text = "Trung bình";
+
+            // rdbKhanCap
+            this.rdbKhanCap.Location = new System.Drawing.Point(15, 70);
+            this.rdbKhanCap.Text = "Khẩn cấp";
+
+            // gbThietBi
+            this.gbThietBi.Controls.Add(this.chkMayTinhBan);
+            this.gbThietBi.Controls.Add(this.chkLaptop);
+            this.gbThietBi.Controls.Add(this.chkMayIn);
+            this.gbThietBi.Controls.Add(this.chkDienThoai);
+            this.gbThietBi.Location = new System.Drawing.Point(23, 150);
+            this.gbThietBi.Size = new System.Drawing.Size(250, 110);
+            this.gbThietBi.Text = "Thiết bị ảnh hưởng";
+
+            // chkMayTinhBan
+            this.chkMayTinhBan.Location = new System.Drawing.Point(15, 25);
+            this.chkMayTinhBan.Text = "Máy tính bàn";
+
+            // chkLaptop
+            this.chkLaptop.Location = new System.Drawing.Point(130, 25);
+            this.chkLaptop.Text = "Laptop";
+
+            // chkMayIn
+            this.chkMayIn.Location = new System.Drawing.Point(15, 60);
+            this.chkMayIn.Text = "Máy in";
+
+            // chkDienThoai
+            this.chkDienThoai.Location = new System.Drawing.Point(130, 60);
+            this.chkDienThoai.Text = "Điện thoại";
+
+            // picAnhLoi
+            this.picAnhLoi.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.picAnhLoi.Location = new System.Drawing.Point(300, 150);
+            this.picAnhLoi.Size = new System.Drawing.Size(170, 110);
+            this.picAnhLoi.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+
+            // btnTaiAnh
+            this.btnTaiAnh.Location = new System.Drawing.Point(300, 270);
+            this.btnTaiAnh.Size = new System.Drawing.Size(170, 28);
+            this.btnTaiAnh.Text = "Tải ảnh lỗi";
+            this.btnTaiAnh.Click += new System.EventHandler(this.btnTaiAnh_Click);
+
+            // btnGuiYeuCau
+            this.btnGuiYeuCau.Location = new System.Drawing.Point(110, 320);
+            this.btnGuiYeuCau.Size = new System.Drawing.Size(120, 35);
+            this.btnGuiYeuCau.Text = "Gửi yêu cầu";
+            this.btnGuiYeuCau.Click += new System.EventHandler(this.btnGuiYeuCau_Click);
+
+            // btnNhapLai
+            this.btnNhapLai.Location = new System.Drawing.Point(250, 320);
+            this.btnNhapLai.Size = new System.Drawing.Size(120, 35);
+            this.btnNhapLai.Text = "Nhập lại";
+            this.btnNhapLai.Click += new System.EventHandler(this.btnNhapLai_Click);
+
+            // Form1
+            this.ClientSize = new System.Drawing.Size(495, 375);
+            this.Controls.Add(this.lblMaPhieu);
+            this.Controls.Add(this.txtMaPhieu);
+            this.Controls.Add(this.lblNguoiYeuCau);
+            this.Controls.Add(this.txtNguoiYeuCau);
+            this.Controls.Add(this.lblNgay);
+            this.Controls.Add(this.dtpNgayGhiNhan);
+            this.Controls.Add(this.lblLoaiSuCo);
+            this.Controls.Add(this.cboLoaiSuCo);
+            this.Controls.Add(this.gbUuTien);
+            this.Controls.Add(this.gbThietBi);
+            this.Controls.Add(this.picAnhLoi);
+            this.Controls.Add(this.btnTaiAnh);
+            this.Controls.Add(this.btnGuiYeuCau);
+            this.Controls.Add(this.btnNhapLai);
+            this.Text = "Form Tiếp nhận & Phân loại sự cố IT";
+            this.Load += new System.EventHandler(this.Form1_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.picAnhLoi)).EndInit();
+            this.gbUuTien.ResumeLayout(false);
+            this.gbThietBi.ResumeLayout(false);
+            this.ResumeLayout(false);
+            this.PerformLayout();
+        }
+
+        #endregion
+
+        private System.Windows.Forms.TextBox txtMaPhieu;
+        private System.Windows.Forms.TextBox txtNguoiYeuCau;
+        private System.Windows.Forms.DateTimePicker dtpNgayGhiNhan;
+        private System.Windows.Forms.RadioButton rdbThap;
+        private System.Windows.Forms.RadioButton rdbTrungBinh;
+        private System.Windows.Forms.RadioButton rdbKhanCap;
+        private System.Windows.Forms.ComboBox cboLoaiSuCo;
+        private System.Windows.Forms.CheckBox chkMayTinhBan;
+        private System.Windows.Forms.CheckBox chkLaptop;
+        private System.Windows.Forms.CheckBox chkMayIn;
+        private System.Windows.Forms.CheckBox chkDienThoai;
+        private System.Windows.Forms.PictureBox picAnhLoi;
+        private System.Windows.Forms.Button btnTaiAnh;
+        private System.Windows.Forms.Button btnGuiYeuCau;
+        private System.Windows.Forms.Button btnNhapLai;
+        private System.Windows.Forms.Label lblMaPhieu;
+        private System.Windows.Forms.Label lblNguoiYeuCau;
+        private System.Windows.Forms.Label lblNgay;
+        private System.Windows.Forms.Label lblLoaiSuCo;
+        private System.Windows.Forms.GroupBox gbUuTien;
+        private System.Windows.Forms.GroupBox gbThietBi;
+    }
+}
