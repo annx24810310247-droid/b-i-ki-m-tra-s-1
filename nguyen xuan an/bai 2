@@ -1,0 +1,312 @@
+////////////////////form.cs
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace bai_2
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            dtpNgayGhiNhan.Value = DateTime.Now;
+
+            if (cboLoaiSuCo.Items.Count == 0)
+            {
+                cboLoaiSuCo.Items.AddRange(new string[] { "Phần cứng", "Phần mềm", "Mạng", "Tài khoản" });
+            }
+            cboLoaiSuCo.SelectedIndex = 0;
+            rdbThap.Checked = true;
+        }
+
+        private void btnTaiAnh_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog ofd = new OpenFileDialog())
+            {
+                ofd.Title = "Chọn ảnh chụp lỗi";
+                ofd.Filter = "Hình ảnh (*.jpg; *.png)|*.jpg;*.png|Tất cả tệp (*.*)|*.*";
+
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    picAnhLoi.Image = Image.FromFile(ofd.FileName);
+                    picAnhLoi.SizeMode = PictureBoxSizeMode.StretchImage;
+                }
+            }
+        }
+
+        private void btnGuiYeuCau_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtMaPhieu.Text))
+            {
+                MessageBox.Show("Vui lòng nhập Mã phiếu!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtMaPhieu.Focus();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtNguoiYeuCau.Text))
+            {
+                MessageBox.Show("Vui lòng nhập Người yêu cầu!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtNguoiYeuCau.Focus();
+                return;
+            }
+
+            string mucDoUuTien = "Thấp";
+            if (rdbTrungBinh.Checked) mucDoUuTien = "Trung bình";
+            else if (rdbKhanCap.Checked) mucDoUuTien = "Khẩn cấp";
+
+            List<string> dsThietBi = new List<string>();
+            if (chkMayTinhBan.Checked) dsThietBi.Add("Máy tính bàn");
+            if (chkLaptop.Checked) dsThietBi.Add("Laptop");
+            if (chkMayIn.Checked) dsThietBi.Add("Máy in");
+            if (chkDienThoai.Checked) dsThietBi.Add("Điện thoại");
+
+            string thietBiText = dsThietBi.Count > 0 ? string.Join(", ", dsThietBi) : "Không có";
+            string loaiSuCo = cboLoaiSuCo.SelectedItem != null ? cboLoaiSuCo.SelectedItem.ToString() : "Chưa chọn";
+            string trangThaiAnh = picAnhLoi.Image != null ? "Đã đính kèm ảnh" : "Chưa có ảnh";
+
+            string thongTinPhieu = $"--- THÔNG TIN PHIẾU SỰ CỐ IT ---\n\n" +
+                                   $"• Mã phiếu: {txtMaPhieu.Text.Trim()}\n" +
+                                   $"• Người yêu cầu: {txtNguoiYeuCau.Text.Trim()}\n" +
+                                   $"• Ngày ghi nhận: {dtpNgayGhiNhan.Value:dd/MM/yyyy HH:mm}\n" +
+                                   $"• Mức độ ưu tiên: {mucDoUuTien}\n" +
+                                   $"• Loại sự cố: {loaiSuCo}\n" +
+                                   $"• Thiết bị ảnh hưởng: {thietBiText}\n" +
+                                   $"• Ảnh chụp lỗi: {trangThaiAnh}";
+
+            MessageBox.Show(thongTinPhieu, "Xác nhận gửi phiếu IT", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void btnNhapLai_Click(object sender, EventArgs e)
+        {
+            txtMaPhieu.Clear();
+            txtNguoiYeuCau.Clear();
+            dtpNgayGhiNhan.Value = DateTime.Now;
+
+            rdbThap.Checked = true;
+
+            if (cboLoaiSuCo.Items.Count > 0)
+                cboLoaiSuCo.SelectedIndex = 0;
+
+            chkMayTinhBan.Checked = false;
+            chkLaptop.Checked = false;
+            chkMayIn.Checked = false;
+            chkDienThoai.Checked = false;
+
+            if (picAnhLoi.Image != null)
+            {
+                picAnhLoi.Image.Dispose();
+                picAnhLoi.Image = null;
+            }
+
+            txtMaPhieu.Focus();
+        }
+    }
+}
+////////////////////////////form1.designer
+namespace bai_2
+{
+    partial class Form1
+    {
+        private System.ComponentModel.IContainer components = null;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        private void InitializeComponent()
+        {
+            this.txtMaPhieu = new System.Windows.Forms.TextBox();
+            this.txtNguoiYeuCau = new System.Windows.Forms.TextBox();
+            this.dtpNgayGhiNhan = new System.Windows.Forms.DateTimePicker();
+            this.rdbThap = new System.Windows.Forms.RadioButton();
+            this.rdbTrungBinh = new System.Windows.Forms.RadioButton();
+            this.rdbKhanCap = new System.Windows.Forms.RadioButton();
+            this.cboLoaiSuCo = new System.Windows.Forms.ComboBox();
+            this.chkMayTinhBan = new System.Windows.Forms.CheckBox();
+            this.chkLaptop = new System.Windows.Forms.CheckBox();
+            this.chkMayIn = new System.Windows.Forms.CheckBox();
+            this.chkDienThoai = new System.Windows.Forms.CheckBox();
+            this.picAnhLoi = new System.Windows.Forms.PictureBox();
+            this.btnTaiAnh = new System.Windows.Forms.Button();
+            this.btnGuiYeuCau = new System.Windows.Forms.Button();
+            this.btnNhapLai = new System.Windows.Forms.Button();
+            this.lblMaPhieu = new System.Windows.Forms.Label();
+            this.lblNguoiYeuCau = new System.Windows.Forms.Label();
+            this.lblNgay = new System.Windows.Forms.Label();
+            this.lblLoaiSuCo = new System.Windows.Forms.Label();
+            this.gbUuTien = new System.Windows.Forms.GroupBox();
+            this.gbThietBi = new System.Windows.Forms.GroupBox();
+            ((System.ComponentModel.ISupportInitialize)(this.picAnhLoi)).BeginInit();
+            this.gbUuTien.SuspendLayout();
+            this.gbThietBi.SuspendLayout();
+            this.SuspendLayout();
+
+            // lblMaPhieu
+            this.lblMaPhieu.AutoSize = true;
+            this.lblMaPhieu.Location = new System.Drawing.Point(20, 23);
+            this.lblMaPhieu.Text = "Mã phiếu:";
+
+            // txtMaPhieu
+            this.txtMaPhieu.Location = new System.Drawing.Point(120, 20);
+            this.txtMaPhieu.Size = new System.Drawing.Size(150, 20);
+
+            // lblNguoiYeuCau
+            this.lblNguoiYeuCau.AutoSize = true;
+            this.lblNguoiYeuCau.Location = new System.Drawing.Point(20, 53);
+            this.lblNguoiYeuCau.Text = "Người yêu cầu:";
+
+            // txtNguoiYeuCau
+            this.txtNguoiYeuCau.Location = new System.Drawing.Point(120, 50);
+            this.txtNguoiYeuCau.Size = new System.Drawing.Size(150, 20);
+
+            // lblNgay
+            this.lblNgay.AutoSize = true;
+            this.lblNgay.Location = new System.Drawing.Point(20, 83);
+            this.lblNgay.Text = "Ngày ghi nhận:";
+
+            // dtpNgayGhiNhan
+            this.dtpNgayGhiNhan.Location = new System.Drawing.Point(120, 80);
+            this.dtpNgayGhiNhan.Size = new System.Drawing.Size(200, 20);
+
+            // lblLoaiSuCo
+            this.lblLoaiSuCo.AutoSize = true;
+            this.lblLoaiSuCo.Location = new System.Drawing.Point(20, 113);
+            this.lblLoaiSuCo.Text = "Loại sự cố:";
+
+            // cboLoaiSuCo
+            this.cboLoaiSuCo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboLoaiSuCo.Location = new System.Drawing.Point(120, 110);
+            this.cboLoaiSuCo.Size = new System.Drawing.Size(150, 21);
+
+            // gbUuTien
+            this.gbUuTien.Controls.Add(this.rdbThap);
+            this.gbUuTien.Controls.Add(this.rdbTrungBinh);
+            this.gbUuTien.Controls.Add(this.rdbKhanCap);
+            this.gbUuTien.Location = new System.Drawing.Point(340, 15);
+            this.gbUuTien.Size = new System.Drawing.Size(130, 115);
+            this.gbUuTien.Text = "Mức độ ưu tiên";
+
+            // rdbThap
+            this.rdbThap.Location = new System.Drawing.Point(15, 20);
+            this.rdbThap.Text = "Thấp";
+
+            // rdbTrungBinh
+            this.rdbTrungBinh.Location = new System.Drawing.Point(15, 45);
+            this.rdbTrungBinh.Text = "Trung bình";
+
+            // rdbKhanCap
+            this.rdbKhanCap.Location = new System.Drawing.Point(15, 70);
+            this.rdbKhanCap.Text = "Khẩn cấp";
+
+            // gbThietBi
+            this.gbThietBi.Controls.Add(this.chkMayTinhBan);
+            this.gbThietBi.Controls.Add(this.chkLaptop);
+            this.gbThietBi.Controls.Add(this.chkMayIn);
+            this.gbThietBi.Controls.Add(this.chkDienThoai);
+            this.gbThietBi.Location = new System.Drawing.Point(23, 150);
+            this.gbThietBi.Size = new System.Drawing.Size(250, 110);
+            this.gbThietBi.Text = "Thiết bị ảnh hưởng";
+
+            // chkMayTinhBan
+            this.chkMayTinhBan.Location = new System.Drawing.Point(15, 25);
+            this.chkMayTinhBan.Text = "Máy tính bàn";
+
+            // chkLaptop
+            this.chkLaptop.Location = new System.Drawing.Point(130, 25);
+            this.chkLaptop.Text = "Laptop";
+
+            // chkMayIn
+            this.chkMayIn.Location = new System.Drawing.Point(15, 60);
+            this.chkMayIn.Text = "Máy in";
+
+            // chkDienThoai
+            this.chkDienThoai.Location = new System.Drawing.Point(130, 60);
+            this.chkDienThoai.Text = "Điện thoại";
+
+            // picAnhLoi
+            this.picAnhLoi.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.picAnhLoi.Location = new System.Drawing.Point(300, 150);
+            this.picAnhLoi.Size = new System.Drawing.Size(170, 110);
+            this.picAnhLoi.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+
+            // btnTaiAnh
+            this.btnTaiAnh.Location = new System.Drawing.Point(300, 270);
+            this.btnTaiAnh.Size = new System.Drawing.Size(170, 28);
+            this.btnTaiAnh.Text = "Tải ảnh lỗi";
+            this.btnTaiAnh.Click += new System.EventHandler(this.btnTaiAnh_Click);
+
+            // btnGuiYeuCau
+            this.btnGuiYeuCau.Location = new System.Drawing.Point(110, 320);
+            this.btnGuiYeuCau.Size = new System.Drawing.Size(120, 35);
+            this.btnGuiYeuCau.Text = "Gửi yêu cầu";
+            this.btnGuiYeuCau.Click += new System.EventHandler(this.btnGuiYeuCau_Click);
+
+            // btnNhapLai
+            this.btnNhapLai.Location = new System.Drawing.Point(250, 320);
+            this.btnNhapLai.Size = new System.Drawing.Size(120, 35);
+            this.btnNhapLai.Text = "Nhập lại";
+            this.btnNhapLai.Click += new System.EventHandler(this.btnNhapLai_Click);
+
+            // Form1
+            this.ClientSize = new System.Drawing.Size(495, 375);
+            this.Controls.Add(this.lblMaPhieu);
+            this.Controls.Add(this.txtMaPhieu);
+            this.Controls.Add(this.lblNguoiYeuCau);
+            this.Controls.Add(this.txtNguoiYeuCau);
+            this.Controls.Add(this.lblNgay);
+            this.Controls.Add(this.dtpNgayGhiNhan);
+            this.Controls.Add(this.lblLoaiSuCo);
+            this.Controls.Add(this.cboLoaiSuCo);
+            this.Controls.Add(this.gbUuTien);
+            this.Controls.Add(this.gbThietBi);
+            this.Controls.Add(this.picAnhLoi);
+            this.Controls.Add(this.btnTaiAnh);
+            this.Controls.Add(this.btnGuiYeuCau);
+            this.Controls.Add(this.btnNhapLai);
+            this.Text = "Form Tiếp nhận & Phân loại sự cố IT";
+            this.Load += new System.EventHandler(this.Form1_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.picAnhLoi)).EndInit();
+            this.gbUuTien.ResumeLayout(false);
+            this.gbThietBi.ResumeLayout(false);
+            this.ResumeLayout(false);
+            this.PerformLayout();
+        }
+
+        #endregion
+
+        private System.Windows.Forms.TextBox txtMaPhieu;
+        private System.Windows.Forms.TextBox txtNguoiYeuCau;
+        private System.Windows.Forms.DateTimePicker dtpNgayGhiNhan;
+        private System.Windows.Forms.RadioButton rdbThap;
+        private System.Windows.Forms.RadioButton rdbTrungBinh;
+        private System.Windows.Forms.RadioButton rdbKhanCap;
+        private System.Windows.Forms.ComboBox cboLoaiSuCo;
+        private System.Windows.Forms.CheckBox chkMayTinhBan;
+        private System.Windows.Forms.CheckBox chkLaptop;
+        private System.Windows.Forms.CheckBox chkMayIn;
+        private System.Windows.Forms.CheckBox chkDienThoai;
+        private System.Windows.Forms.PictureBox picAnhLoi;
+        private System.Windows.Forms.Button btnTaiAnh;
+        private System.Windows.Forms.Button btnGuiYeuCau;
+        private System.Windows.Forms.Button btnNhapLai;
+        private System.Windows.Forms.Label lblMaPhieu;
+        private System.Windows.Forms.Label lblNguoiYeuCau;
+        private System.Windows.Forms.Label lblNgay;
+        private System.Windows.Forms.Label lblLoaiSuCo;
+        private System.Windows.Forms.GroupBox gbUuTien;
+        private System.Windows.Forms.GroupBox gbThietBi;
+    }
+}
