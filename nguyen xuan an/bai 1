@@ -1,0 +1,243 @@
+/////////////////////////from1.cs
+using System;
+using System.Globalization;
+using System.Windows.Forms;
+
+namespace ServiceChargeCalculator
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+
+            // Đảm bảo ô Giảm giá luôn cho phép nhập liệu khi mở Form
+            txtPhanTramGiam.Enabled = true;
+            txtPhanTramGiam.ReadOnly = false;
+        }
+
+        // Sự kiện khi bấm nút "Tính tiền" (btnTinhTien)
+        private void btnTinhTien_Click(object sender, EventArgs e)
+        {
+            // 1. Validate Đơn giá dịch vụ
+            if (!decimal.TryParse(txtDonGia.Text.Trim(), out decimal donGia) || donGia < 0)
+            {
+                MessageBox.Show("Vui lòng nhập Đơn giá dịch vụ là số lớn hơn hoặc bằng 0!",
+                                "Lỗi nhập liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtDonGia.Focus();
+                txtDonGia.SelectAll();
+                return;
+            }
+
+            // 2. Validate Số lượng khách
+            if (!int.TryParse(txtSoLuong.Text.Trim(), out int soLuong) || soLuong <= 0)
+            {
+                MessageBox.Show("Vui lòng nhập Số lượng khách là số nguyên dương (> 0)!",
+                                "Lỗi nhập liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtSoLuong.Focus();
+                txtSoLuong.SelectAll();
+                return;
+            }
+
+            // 3. Validate Phần trăm giảm giá (%)
+            string giamGiaInput = string.IsNullOrWhiteSpace(txtPhanTramGiam.Text) ? "0" : txtPhanTramGiam.Text.Trim();
+            if (!decimal.TryParse(giamGiaInput, out decimal phanTramGiam) || phanTramGiam < 0 || phanTramGiam > 100)
+            {
+                MessageBox.Show("Vui lòng nhập Phần trăm giảm giá từ 0 đến 100!",
+                                "Lỗi nhập liệu", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtPhanTramGiam.Focus();
+                txtPhanTramGiam.SelectAll();
+                return;
+            }
+
+            // 4. Tính toán tổng tiền
+            decimal tongTien = (donGia * soLuong) * (100 - phanTramGiam) / 100m;
+
+            // 5. Hiển thị kết quả (định dạng dấu phân cách hàng nghìn VNĐ)
+            lblTongTien.Text = string.Format(new CultureInfo("vi-VN"), "{0:N0} VNĐ", tongTien);
+        }
+
+        // Sự kiện khi bấm nút "Làm mới" (btnLamMoi)
+        private void btnLamMoi_Click(object sender, EventArgs e)
+        {
+            txtDonGia.Clear();
+            txtSoLuong.Clear();
+            txtPhanTramGiam.Text = "0";
+            lblTongTien.Text = "0 VNĐ";
+
+            txtDonGia.Focus();
+        }
+    }
+}
+/////////////////Form1.Designer
+namespace ServiceChargeCalculator
+{
+    partial class Form1
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.lblDonGia = new System.Windows.Forms.Label();
+            this.txtDonGia = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.lblPhanTramGiam = new System.Windows.Forms.Label();
+            this.lblTongTienTitle = new System.Windows.Forms.Label();
+            this.lblTongTien = new System.Windows.Forms.Label();
+            this.txtSoLuong = new System.Windows.Forms.TextBox();
+            this.txtPhanTramGiam = new System.Windows.Forms.TextBox();
+            this.btnTinhTien = new System.Windows.Forms.Button();
+            this.btnLamMoi = new System.Windows.Forms.Button();
+            this.SuspendLayout();
+            // 
+            // lblDonGia
+            // 
+            this.lblDonGia.AutoSize = true;
+            this.lblDonGia.Location = new System.Drawing.Point(248, 33);
+            this.lblDonGia.Name = "lblDonGia";
+            this.lblDonGia.Size = new System.Drawing.Size(117, 13);
+            this.lblDonGia.TabIndex = 0;
+            this.lblDonGia.Text = "Đơn giá dịch vụ (VNĐ):";
+            // 
+            // txtDonGia
+            // 
+            this.txtDonGia.Location = new System.Drawing.Point(376, 30);
+            this.txtDonGia.Name = "txtDonGia";
+            this.txtDonGia.Size = new System.Drawing.Size(100, 20);
+            this.txtDonGia.TabIndex = 1;
+            this.txtDonGia.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(248, 75);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(85, 13);
+            this.label1.TabIndex = 2;
+            this.label1.Text = "Số lượng khách:";
+            // 
+            // lblPhanTramGiam
+            // 
+            this.lblPhanTramGiam.AutoSize = true;
+            this.lblPhanTramGiam.Location = new System.Drawing.Point(248, 124);
+            this.lblPhanTramGiam.Name = "lblPhanTramGiam";
+            this.lblPhanTramGiam.Size = new System.Drawing.Size(68, 13);
+            this.lblPhanTramGiam.TabIndex = 3;
+            this.lblPhanTramGiam.Text = "Giảm giá (%):";
+            // 
+            // lblTongTienTitle
+            // 
+            this.lblTongTienTitle.AutoSize = true;
+            this.lblTongTienTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblTongTienTitle.Location = new System.Drawing.Point(248, 182);
+            this.lblTongTienTitle.Name = "lblTongTienTitle";
+            this.lblTongTienTitle.Size = new System.Drawing.Size(109, 13);
+            this.lblTongTienTitle.TabIndex = 4;
+            this.lblTongTienTitle.Text = "Tổng tiền thanh toán:";
+            // 
+            // lblTongTien
+            // 
+            this.lblTongTien.AutoSize = true;
+            this.lblTongTien.Location = new System.Drawing.Point(373, 182);
+            this.lblTongTien.Name = "lblTongTien";
+            this.lblTongTien.Size = new System.Drawing.Size(39, 13);
+            this.lblTongTien.TabIndex = 5;
+            this.lblTongTien.Text = "0 VNĐ";
+            // 
+            // txtSoLuong
+            // 
+            this.txtSoLuong.Location = new System.Drawing.Point(376, 75);
+            this.txtSoLuong.Name = "txtSoLuong";
+            this.txtSoLuong.Size = new System.Drawing.Size(100, 20);
+            this.txtSoLuong.TabIndex = 1;
+            // 
+            // txtPhanTramGiam
+            // 
+            this.txtPhanTramGiam.Location = new System.Drawing.Point(376, 124);
+            this.txtPhanTramGiam.Name = "txtPhanTramGiam";
+            this.txtPhanTramGiam.Size = new System.Drawing.Size(100, 20);
+            this.txtPhanTramGiam.TabIndex = 2;
+            this.txtPhanTramGiam.Text = "0";
+            this.txtPhanTramGiam.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // btnTinhTien
+            // 
+            this.btnTinhTien.BackColor = System.Drawing.Color.LightGreen;
+            this.btnTinhTien.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.btnTinhTien.Location = new System.Drawing.Point(251, 234);
+            this.btnTinhTien.Name = "btnTinhTien";
+            this.btnTinhTien.Size = new System.Drawing.Size(75, 23);
+            this.btnTinhTien.TabIndex = 3;
+            this.btnTinhTien.Text = "Tính tiền";
+            this.btnTinhTien.UseVisualStyleBackColor = false;
+            this.btnTinhTien.Click += new System.EventHandler(this.btnTinhTien_Click);
+            // 
+            // btnLamMoi
+            // 
+            this.btnLamMoi.Location = new System.Drawing.Point(376, 234);
+            this.btnLamMoi.Name = "btnLamMoi";
+            this.btnLamMoi.Size = new System.Drawing.Size(75, 23);
+            this.btnLamMoi.TabIndex = 4;
+            this.btnLamMoi.Text = "Làm mới";
+            this.btnLamMoi.UseVisualStyleBackColor = true;
+            // 
+            // Form1
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSize = true;
+            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.btnLamMoi);
+            this.Controls.Add(this.btnTinhTien);
+            this.Controls.Add(this.txtPhanTramGiam);
+            this.Controls.Add(this.txtSoLuong);
+            this.Controls.Add(this.lblTongTien);
+            this.Controls.Add(this.lblTongTienTitle);
+            this.Controls.Add(this.lblPhanTramGiam);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.txtDonGia);
+            this.Controls.Add(this.lblDonGia);
+            this.Name = "Form1";
+            this.Text = "Số lượng khách:";
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.Label lblDonGia;
+        private System.Windows.Forms.TextBox txtDonGia;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblPhanTramGiam;
+        private System.Windows.Forms.Label lblTongTienTitle;
+        private System.Windows.Forms.Label lblTongTien;
+        private System.Windows.Forms.TextBox txtSoLuong;
+        private System.Windows.Forms.TextBox txtPhanTramGiam;
+        private System.Windows.Forms.Button btnTinhTien;
+        private System.Windows.Forms.Button btnLamMoi;
+    }
+}
+
