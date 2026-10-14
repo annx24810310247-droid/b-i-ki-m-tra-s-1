@@ -1,0 +1,237 @@
+using System;
+using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
+
+namespace bai_4
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            // 1. Thêm khung giờ
+            cboKhungGio.Items.Add("Sáng (100.000đ)");
+            cboKhungGio.Items.Add("Tối (150.000đ)");
+            cboKhungGio.SelectedIndex = 0;
+
+            // 2. Dùng vòng lặp for tạo 20 Button
+            for (int i = 1; i <= 20; i++)
+            {
+                Button btn = new Button
+                {
+                    Text = i.ToString(),
+                    Width = 75,
+                    Height = 45,
+                    BackColor = Color.LightGray // Trắng/Xám: Trống
+                };
+
+                // Vị trí 3 và 8 giả định đã có người đặt trước (Màu đỏ, khóa nút)
+                if (i == 3 || i == 8)
+                {
+                    btn.BackColor = Color.Red;
+                    btn.Enabled = false;
+                }
+                else
+                {
+                    // Gán CHUNG 1 hàm xử lý Click cho toàn bộ 20 nút
+                    btn.Click += Vitri_Click;
+                }
+
+                flpSoDo.Controls.Add(btn);
+            }
+        }
+
+        // Sự kiện Click dùng chung cho các vị trí
+        private void Vitri_Click(object sender, EventArgs e)
+        {
+            Button btn = (Button)sender;
+
+            // Đổi màu qua lại: Xám (Trống) <-> Xanh lá (Đang chọn)
+            if (btn.BackColor == Color.LightGray)
+                btn.BackColor = Color.LightGreen;
+            else if (btn.BackColor == Color.LightGreen)
+                btn.BackColor = Color.LightGray;
+
+            TinhTien();
+        }
+
+        // Hàm cập nhật số lượng vị trí chọn và tính tổng tiền
+        private void TinhTien()
+        {
+            // Đếm số nút có màu Xanh lá
+            int soLuong = flpSoDo.Controls.OfType<Button>().Count(b => b.BackColor == Color.LightGreen);
+            int giaTien = cboKhungGio.SelectedIndex == 0 ? 100000 : 150000;
+
+            lblSoViTri.Text = $"Số vị trí đang chọn: {soLuong}";
+            lblTongTien.Text = $"Tạm tính tiền: {soLuong * giaTien:#,##0} VNĐ";
+        }
+
+        // Đổi khung giờ -> Tính lại tiền
+        private void cboKhungGio_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            TinhTien();
+        }
+
+        // Nút Xác nhận đặt
+        private void btnXacNhan_Click(object sender, EventArgs e)
+        {
+            var dsDangChon = flpSoDo.Controls.OfType<Button>().Where(b => b.BackColor == Color.LightGreen).ToList();
+
+            if (dsDangChon.Count == 0)
+            {
+                MessageBox.Show("Vui lòng chọn ít nhất 1 vị trí!", "Thông báo");
+                return;
+            }
+
+            // Chuyển các nút đang chọn thành Màu Đỏ và Khóa lại
+            foreach (var btn in dsDangChon)
+            {
+                btn.BackColor = Color.Red;
+                btn.Enabled = false;
+            }
+
+            MessageBox.Show("Đặt vị trí thành công!", "Thông báo");
+            TinhTien();
+        }
+
+        // Nút Hủy chọn tất cả
+        private void btnHuy_Click(object sender, EventArgs e)
+        {
+            foreach (var btn in flpSoDo.Controls.OfType<Button>().Where(b => b.BackColor == Color.LightGreen))
+            {
+                btn.BackColor = Color.LightGray;
+            }
+            TinhTien();
+        }
+    }
+}
+//////////////////////form.designer
+namespace bai_4
+{
+    partial class Form1
+    {
+        private System.ComponentModel.IContainer components = null;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        private void InitializeComponent()
+        {
+            this.flpSoDo = new System.Windows.Forms.FlowLayoutPanel();
+            this.lblKhungGio = new System.Windows.Forms.Label();
+            this.cboKhungGio = new System.Windows.Forms.ComboBox();
+            this.lblSoViTri = new System.Windows.Forms.Label();
+            this.lblTongTien = new System.Windows.Forms.Label();
+            this.btnXacNhan = new System.Windows.Forms.Button();
+            this.btnHuy = new System.Windows.Forms.Button();
+            this.SuspendLayout();
+            // 
+            // flpSoDo
+            // 
+            this.flpSoDo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.flpSoDo.Location = new System.Drawing.Point(12, 12);
+            this.flpSoDo.Name = "flpSoDo";
+            this.flpSoDo.Size = new System.Drawing.Size(430, 270);
+            this.flpSoDo.TabIndex = 0;
+            // 
+            // lblKhungGio
+            // 
+            this.lblKhungGio.AutoSize = true;
+            this.lblKhungGio.Location = new System.Drawing.Point(460, 20);
+            this.lblKhungGio.Name = "lblKhungGio";
+            this.lblKhungGio.Size = new System.Drawing.Size(86, 13);
+            this.lblKhungGio.Text = "Chọn khung giờ:";
+            // 
+            // cboKhungGio
+            // 
+            this.cboKhungGio.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboKhungGio.Location = new System.Drawing.Point(463, 40);
+            this.cboKhungGio.Name = "cboKhungGio";
+            this.cboKhungGio.Size = new System.Drawing.Size(180, 21);
+            this.cboKhungGio.TabIndex = 1;
+            this.cboKhungGio.SelectedIndexChanged += new System.EventHandler(this.cboKhungGio_SelectedIndexChanged);
+            // 
+            // lblSoViTri
+            // 
+            this.lblSoViTri.AutoSize = true;
+            this.lblSoViTri.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold);
+            this.lblSoViTri.ForeColor = System.Drawing.Color.Blue;
+            this.lblSoViTri.Location = new System.Drawing.Point(460, 85);
+            this.lblSoViTri.Name = "lblSoViTri";
+            this.lblSoViTri.Size = new System.Drawing.Size(147, 15);
+            this.lblSoViTri.Text = "Số vị trí đang chọn: 0";
+            // 
+            // lblTongTien
+            // 
+            this.lblTongTien.AutoSize = true;
+            this.lblTongTien.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold);
+            this.lblTongTien.ForeColor = System.Drawing.Color.Red;
+            this.lblTongTien.Location = new System.Drawing.Point(460, 115);
+            this.lblTongTien.Name = "lblTongTien";
+            this.lblTongTien.Size = new System.Drawing.Size(140, 15);
+            this.lblTongTien.Text = "Tạm tính tiền: 0 VNĐ";
+            // 
+            // btnXacNhan
+            // 
+            this.btnXacNhan.BackColor = System.Drawing.Color.LightGreen;
+            this.btnXacNhan.Location = new System.Drawing.Point(463, 160);
+            this.btnXacNhan.Name = "btnXacNhan";
+            this.btnXacNhan.Size = new System.Drawing.Size(180, 35);
+            this.btnXacNhan.TabIndex = 2;
+            this.btnXacNhan.Text = "Xác nhận đặt";
+            this.btnXacNhan.UseVisualStyleBackColor = false;
+            this.btnXacNhan.Click += new System.EventHandler(this.btnXacNhan_Click);
+            // 
+            // btnHuy
+            // 
+            this.btnHuy.Location = new System.Drawing.Point(463, 205);
+            this.btnHuy.Name = "btnHuy";
+            this.btnHuy.Size = new System.Drawing.Size(180, 30);
+            this.btnHuy.TabIndex = 3;
+            this.btnHuy.Text = "Hủy chọn tất cả";
+            this.btnHuy.UseVisualStyleBackColor = true;
+            this.btnHuy.Click += new System.EventHandler(this.btnHuy_Click);
+            // 
+            // Form1
+            // 
+            this.ClientSize = new System.Drawing.Size(660, 295);
+            this.Controls.Add(this.btnHuy);
+            this.Controls.Add(this.btnXacNhan);
+            this.Controls.Add(this.lblTongTien);
+            this.Controls.Add(this.lblSoViTri);
+            this.Controls.Add(this.cboKhungGio);
+            this.Controls.Add(this.lblKhungGio);
+            this.Controls.Add(this.flpSoDo);
+            this.Name = "Form1";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Bài 4: Sơ đồ vị trí chỗ ngồi / Đặt bàn";
+            this.Load += new System.EventHandler(this.Form1_Load);
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.FlowLayoutPanel flpSoDo;
+        private System.Windows.Forms.Label lblKhungGio;
+        private System.Windows.Forms.ComboBox cboKhungGio;
+        private System.Windows.Forms.Label lblSoViTri;
+        private System.Windows.Forms.Label lblTongTien;
+        private System.Windows.Forms.Button btnXacNhan;
+        private System.Windows.Forms.Button btnHuy;
+    }
+}
